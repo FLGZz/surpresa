@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F + M</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" 
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" 
+        crossorigin="anonymous">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Pacifico', cursive;
+      color: white;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #E63946, #F46036, #e97c7a, #fa9dae);
+      background-size: 400% 400%;
+      animation: gradient-animation 12s ease infinite;
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    p {
+      font-family: 'Pacifico', cursive;
+      padding: 20px;
+      font-size: 20px;
+      z-index: 2;
+    }
+    button {
+      font-family: Arial, sans-serif;
+      font-size: 1rem;
+      color: white;
+      border: 1px solid #fff;
+      padding: 15px 30px;
+      cursor: pointer;
+      background: linear-gradient(270deg, #E63946, #F46036, #e97c7a, #fa9dae);
+      background-size: 400% 400%;
+      animation: gradient-animation 12s ease infinite;
+      border-radius: 3px;
+      transition: transform 0.2s;
+      z-index: 2;
+    }
+    button:hover { transform: scale(1.05); }
+    @keyframes gradient-animation {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .hidden { display: none; }
+    .new-content {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+      z-index: 2;
+    }
+    .new-content.active { display: block; }
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      button { padding: 12px 24px; font-size: 0.9rem; }
+    }
+    /* Animação dos corações ;) */
+    .heart {
+      position: absolute;
+      background: red;
+      transform: rotate(45deg);
+      animation: fall linear infinite;
+      z-index: 1;
+    }
+    .heart:before, .heart:after {
+      content: "";
+      position: absolute;
+      background: red;
+      border-radius: 50%;
+      width: 100%;
+      height: 100%;
+    }
+    .heart:before { top: -50%; left: 0; }
+    .heart:after { left: 50%; top: 0; }
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(var(--initial-rotation, 45deg)); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(var(--initial-rotation, 45deg)); opacity: 0; }
+    }
+    @media (max-width: 480px) {
+      .heart { width: 10px; height: 10px; }
+    }
+    .carousel-item img {
+      width: auto;
+      height: 250px;
+      object-fit: scale-down;
+    }
+    @media (min-width: 768px) {
+    .carousel-item img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: scale-down;
+      }
+    }
+
+    #counter {
+      font-size: 1.5rem;
+      padding: 20px;
+      font-family: 'Pacifico', cursive;
+    }
+    /* O miniplayer pra reproduzir as nossas músicas :DD */
+   #miniplayer {
+      left: 50%;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-family: Arial, sans-serif;
+      z-index: 1000;
+    }
+    #miniplayer .controls {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+    }
+    #miniplayer button {
+      background: transparent;
+      border: 1px solid #fff;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #miniplayer button:hover {
+      background: #fff;
+      color: #000;
+    }
+    #trackInfo {
+      font-size: 14px;
+    }
+
+    #miniplayer .p2 {
+      font-family: 'Pacifico', cursive;
+      padding: 5px;
+      font-size: 15px;
+      z-index: 2;
+    }
+
+    #music-description-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+#toggle-description {
+  background: transparent;
+  border: 1px solid #fff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#music-description {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(0,0,0,0.85);
+  padding: 10px;
+  border-radius: 8px;
+  width: 250px;
+  max-height: 150px;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+  z-index: 10;
+}
+
+#music-description.collapsed {
+  max-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+#description-text {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+}
+ 
+</style>
+
+<!-- O style do joguinho :DDD-->
+ <style>
+  #open-game-btn {
+  margin: 20px;
+  padding: 12px 24px;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+#game-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+canvas {
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+}
+
+#close-game-btn {
+  position: fixed;
+  top: 10px; right: 10px;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  padding: 8px 12px;
+  font-size: 20px;
+  border-radius: 6px;
+  z-index: 10002;
+  pointer-events: auto;
+}
+
+#note-popup {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.95);
+  color:#000;
+  padding: 20px 30px;
+  border-radius: 8px;
+  display: none;
+  text-align: center;
+  z-index: 10002;
+  pointer-events: auto;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+#note-image {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 500px;
+  max-width: 80%;
+  cursor: pointer;
+  z-index: 10002;
+  opacity: 0;
+  transition: transform 0.8s ease, opacity 0.8s ease;
+  display: none;
+}
+#note-image.show {
+  display: block;
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+#game-ui {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  color: white;
+  font-size: 1.2rem;
+  z-index: 10002;
+  pointer-events: none;
+  font-family: 'Pacifico', cursive;
+}
+#game-counter {
+  font-size: 1rem;
+  margin-top: 5px;
+}
+
+.note {
+  position: absolute;
+  opacity: 0;         
+  pointer-events: none; 
+}
+
+@media (max-width: 768px) {
+  .note {
+    max-width: 200px;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .note p {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  #game-ui {
+    font-size: 1rem;
+  }
+
+  #game-counter {
+    font-size: 0.9rem;
+  }
+
+  #note-image {
+    width: 80%;
+  }
+
+  #note-popup {
+    font-size: 10px;
+    padding: 16px 20px;
+    max-height: 50vh;
+  }
+}
+  
+#lantern-emoji {
+  position: absolute;
+  font-size: 50px;
+  cursor: grab;
+  z-index: 10001;
+  text-shadow: 0 0 15px rgba(255, 236, 168, 0.8);
+  user-select: none;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.6));
+  transition: transform 0.1s;
+  pointer-events: auto;
+}
+
+#lantern-emoji.dragging {
+  cursor: grabbing;
+  transform: translateX(-50%) scale(1.1);
+}
+
+#lantern-emoji:active {
+  transform: translateX(-50%) scale(1.05);
+}
+
+@media (max-width: 768px) {
+  #lantern-emoji {
+    font-size: 40px;
+    bottom: 20px;
+  }
+}
+
+  </style>
+  
+  <!-- Puxa o fuso-horário correto .-. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.34/moment-timezone-with-data-10-year-range.min.js"></script>
+  
+</head>
+<body>
+    <p id="p">Olha, eu espero que você goste...</p>
+    <!--Deu trabalho kkkkkkk-->
+    <!--Talvez você nem leia isso, mas eu te amo ;)-->
+    <button id="actionButton">Clica aqui :D</button>
+
+<div id="newContent" class="new-content">
+
+    <div id="miniplayer">
+  <p class="p2">obs: aumenta o som :D</p>
+  <div class="controls">
+    <button id="prev">◀</button>
+    <button id="playPause">Play</button>
+    <button id="next">▶</button>
+    <span id="trackInfo">Carregando...</span>
+    <div id="music-description-container">
+  <button id="toggle-description">📝</button>
+  <div id="music-description" class="collapsed">
+    <p id="description-text">Descrição da música...</p>
+  </div>
+</div>
+  </div>
+</div>
+  
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+      <ol class="carousel-indicators">
+        <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="3"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="4"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="5"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="6"></li>
+      </ol>
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+         <p></p>
+          <img class="d-block w-100" src="images/❤️.jpg" alt="Primeiro Slide">    
+        </div>
+        <div class="carousel-item">
+          <p></p>
+          <img class="d-block w-100" src="images/FestaJunina.jpg" alt="Segundo Slide">
+        </div>
+        <div class="carousel-item">
+          <p></p>
+          <img class="d-block w-100" src="images\IMG_20241231_232403_291.webp" alt="Terceiro Slide">
+        </div>
+        <div class="carousel-item">
+          <p></p>
+          <img class="d-block w-100" src="images\IMG_20241012_193952_270.webp" alt="Quarto Slide">
+        </div>
+        <div class="carousel-item">
+          <p></p>
+          <img class="d-block w-100" src="images\IMG_20250111_191742_850.jpg" alt="Quinto Slide">
+        </div>
+        <div class="carousel-item">
+          <p></p>
+          <img class="d-block w-100" src="images\IMG-20240428-WA0019.jpg" alt="Sexto Slide">
+        </div>
+        <div class="carousel-item">
+          <p></p>
+          <img class="d-block w-100" src="images\Dia do cinema.jpg" alt="Sétimo Slide">
+        </div>  
+
+      </div>
+      <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Anterior</span>
+      </a>
+      <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Próximo</span>
+      </a>
+    </div> 
+
+    <div class="diasjuntos">
+      <p>Estamos á</p>
+      <div id="counter" class="diasjuntos"></div>
+      <p>juntos! :3</p>
+    </div>
+
+    <button id="open-game-btn">Iniciar Joguinho :D</button>
+
+<div id="game-container">
+
+<div id="game-ui">
+  <p id="game-instruction">Encontre os bilhetinhos :3</p>
+  <p id="game-counter">Faltam 3 bilhetes</p>
+</div>
+  <div id="lantern-emoji">🔦</div>
+  <canvas id="flashlight"></canvas>
+  <button id="close-game-btn">X</button>
+
+  <img id="note-image" src="images/1000068190.png" alt="Bilhete" />
+
+  <div class="note">
+    <p>O meu amor por você</p>
+    <br>
+    <p>Eu te amo. Amo a nossa relação, sou grato por ter você na minha vida. Eu não trocaria o que nós temos juntos por nada e nem por ninguém. Esse sentimento só cresce em mim, como se fosse uma chama eterna...
+Não precisa ter medo, eu nunca vou te deixar e não é só porque prometi pra você em cartinhas de amor ou em conversas da madrugada, mas sim porque eu te amo muito. Eu quero viver ao seu lado independente de qualquer tempestade, qualquer crise, qualquer dificuldade. Em qualquer circunstância, na alegria, na dor, na vitória, na dor, na saúde ou na doença. Eu sei que fica até enjoativo falar isso tantas vezes, mas eu te garanto que toda vez que eu digo "eu te amo", não é sempre a mesma intensidade, pois cada vez que falo a intensidade só aumenta ❤️
+Obs: cada coração que cai nessa página é um "eu te amo" :D
+</p></div>
+  <div class="note">
+  <p>Um pouco sobre esse site .-.</p>
+  <br>
+  <p>Eu admito, me inspirei em alguns vídeos que vi a um tempo atrás. Mas achei que seria sacanagem ir atrás de alugar um negócio desses sendo que poderia fazer um eu mesmo. Não é nem pelo dinheiro, e sim porque foi eu que fiz sabe? Ainda mais que tá relacionado a uma área que gosto, é algo que fiz com carinho. Eu posso não ter tanta experiência agora, mas eu garanto que dei o meu melhor aqui.
+Se você não gostar muito, vale lembrar que tô aprendendo a programar ainda kkkkkkkk
+Foi muito divertido fazer esse site, porque enquanto fazia e colocava nossas fotos e músicas, eu lembrei dos momentos que a gente viveu. Não só os bons, lembrei também de momentos difíceis que vivemos juntos, mas esses momentos também são importantes, fazem parte da nossa história. Sério, é bizarro lembrar que já fazem 
+</p>
+  <div class="diasjuntos bilhete-counter"></div>
+  <p> que estamos juntos...
+</p>
+</div>
+  <div class="note">
+  <p>Dificuldades</p>
+  <br>
+  <p>É claro que às vezes vamos ter momentos difíceis, mas e os momentos bons? Nem sempre tudo vai ser mil maravilhas, vamos nos desentender. Por mim queria que não houvesse conflitos, mas isso faz parte de um relacionamento, é o que nos constrói, é o que reforça o nosso laço.
+    No fim a sensação de resolver um problema que estavamos tendo é tão boa, me sinto feliz por nós dois, fico feliz por estar tudo calmo novamente e feliz por saber que amadurecemos com a situação.
+    É por isso que amo até mesmo nossas conversas difíceis, pois significa que é uma oportunidade de reforçar nossa relação 🫶
+    </p>
+</div>
+
+  <div class="note">
+    <p>Importância</p>
+    <br>
+    <p>Sério, você é muito importante pra mim, eu sou muito grato por te ter na minha vida. Às vezes fico até chateado quando você fala que não é uma boa namorada. Poxa, é claro que temos desentendimentos de vez de enquando, isso não te faz uma má namorada, seja gentil com você mesma. Eu fico meio triste por isso porque você faz tanto por mim, sinceramente ninguém nunca deu tanta atenção pro que eu sinto igual você me dá, nunca me senti tão confortável com alguém igual eu me sinto com você, nunca fui tão feliz antes igual sou feliz com você. Desde 31/12/23, às 23:30 minha vida mudou, eu conheci a felicidade. Quando estávamos indo embora e fomos nos despedir, conheci o seu abraço quente e acolhedor, um sentimento que eu nunca tinha sentido antes…
+      Talvez falar muito sobre o que senti naquele abraço pode causar a impressão de que não é mais tão intenso, mas sinceramente, até hoje me lembrar da sensação daquele abraço me traz um arrepio…
+      </p>
+  </div>
+
+  <div class="note">
+    <p>Primeiras Impressões</p>
+    <br>
+    <p>Você se lembra? Acho que nem você imaginava na primeira vez que nós interagimos que um dia estariamos namorando (sinceramente não esperava nem que um dia eu iria estar escrevendo um código inteiro pra declaração de amor .__.). É bizarro isso kkkkkk
+      Eu não me arrependo de nada, sou muito feliz por ter você na minha vida, e viveria todos os nossos momentos denovo :3.
+    </p>
+  </div>
+
+  <div class="note">
+    <p>Conversas Noturnas</p>
+    <br>
+    <p>E nossas conversas? Aquelas conversas que tivemos de madrugada em call? Poxa, eu não troco aquilo por nada. Ainda mais as conversas que tinhamos no começo, lembro que teve chamadas em que eu estava desmaiando de sono, mas eu dava um jeito de me manter acordado só porque eu queria conversar mais com você kkkkkkkkkk</p>
+  </div>
+
+  <div class="note">
+    <p>Tempo de Qualidade</p>
+    <br>
+    <p>E o nosso tempo juntos? É tão bom, me sinto muito bem toda vez que passamos tempo juntos, só eu e você. Tem hora que tudo que eu preciso é ficar só com você, é um sentimento inexplicável, eu não vou conseguir explicar aqui mas acredito que você sabe do que eu tô falando kkkkkkk
+      Ficar com você é como se eu estivesse me recarregando, recuperando as minhas forças, restaurando o que perdi com o cansaço da semana.
+      </p>
+  </div>   
+
+  <div id="note-popup">
+    <div id="note-text"></div>
+    <button onclick="closeNote()">Fechar</button>
+  </div>
+</div>
+  </div>
+
+  <script>
+  // função de criar os coraçãozinho da tela .-.
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+    const isSmallScreen = window.innerWidth < 480;
+    const minSize = isSmallScreen ? 8 : 10;
+    const maxSize = isSmallScreen ? 20 : 30;
+    const size = Math.random() * (maxSize - minSize) + minSize;
+    const vw = document.documentElement.clientWidth;
+    heart.style.left = Math.random() * (vw - size) + 'px';
+    heart.style.width = size + 'px';
+    heart.style.height = size + 'px';
+    heart.style.top = -size + 'px';
+    const duration = Math.random() * 4 + 2;
+    heart.style.animationDuration = duration + 's';
+    heart.style.animationDelay = Math.random() + 's';
+    const angle = Math.random() * 360 - 360;
+    heart.style.setProperty('--initial-rotation', angle + 'deg');
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), duration * 1000);
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const button     = document.getElementById('actionButton');
+    const newContent = document.getElementById('newContent');
+    const p          = document.getElementById('p');
+    let heartTimer;   
+
+    button.addEventListener('click', function () {
+  
+      button.classList.add('hidden');
+      p.classList.add('hidden');
+      newContent.classList.add('active');
+      newContent.style.opacity = 0;
+      newContent.style.transition = "opacity 1s";
+      setTimeout(() => newContent.style.opacity = 1, 50);
+
+      if (!heartTimer) {
+        heartTimer = setInterval(createHeart, 100);
+      }
+    });
+  });
+</script>
+
+  <!-- Script que conta quanto tempo passou desde 31/12/23 23:30 :D -->
+  <script>
+    function pluralize(value, singular, plural) {
+      return value + " " + (value === 1 ? singular : plural);
+    }
+    function updateCounter() {
+      let startDate = moment.tz("2023-12-31T23:30:00", "America/Sao_Paulo");
+      const now = moment.tz("America/Sao_Paulo");
+      let years = now.diff(startDate, 'years');
+      startDate.add(years, 'years');
+      let months = now.diff(startDate, 'months');
+      startDate.add(months, 'months');
+      let days = now.diff(startDate, 'days');
+      startDate.add(days, 'days');
+      let hours = now.diff(startDate, 'hours');
+      startDate.add(hours, 'hours');
+      let minutes = now.diff(startDate, 'minutes');
+      startDate.add(minutes, 'minutes');
+      let seconds = now.diff(startDate, 'seconds');
+      const text = 
+        `${pluralize(years, "ano", "anos")}, ` +
+        `${pluralize(months, "mês", "meses")}, ` +
+        `${pluralize(days, "dia", "dias")}, ` +
+        `${pluralize(hours, "hora", "horas")}, ` +
+        `${pluralize(minutes, "minuto", "minutos")} e ` +
+        `${pluralize(seconds, "segundo", "segundos")}`;
+      document.getElementById("counter").innerHTML = text;
+
+      const bilheteCounter = document.querySelector(".bilhete-counter");
+  if (bilheteCounter) {
+    bilheteCounter.innerHTML = text;
+  }
+
+    }
+    updateCounter();
+    setInterval(updateCounter, 1000);
+  </script>
+
+  <!-- Script do miniplayer pra reproduzir as músicas :DDDD (to ficando louco)-->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js" crossorigin="anonymous"></script>
+  <script>
+
+const playlist = [
+  { 
+    title: "Love Mine All Mine - Mitski", 
+    src: "audio/love mine all mine.mp3",
+    description: "Eu já disse isso um monte de vezes, sinceramente acredito que você até já enjoou dessa música, mas ela sempre me lembra muito a gente. Pode ser idiota, mas é porque no começo do namoro a gente vivia mandando vídeo do tiktok que tinha essa música, aí acabei associando kkkkkkk" 
+  },
+  { 
+    title: "Tempo Perdido - Legião Urbana", 
+    src: "audio/tempo perdido.mp3",
+    description: " Eu lembro que você me dedicou essa música do nada, quando eu escutei eu admito que tive que dar uma pesquisada no significado porque sou péssimo com interpretação 😅. Agora toda vez que escuto, lembro da gente, me tras a sensação de que temos que viver cada momento como se fosse o último. E no fim, nunca será tempo perdido..." 
+  },
+  { 
+    title: "Sweet Child O' Mine - Guns N' Roses", 
+    src: "audio/Guns N' Roses - Sweet Child O' Mine (Lyrics).mp3",
+    description: "Essa música é do caralho, foi o que me fez começar a gostar mais de rock, toda vez que eu escuto eu me lembro de vídeo, não só pelo significado da letra, mas até mesmo o solo que chega a dar arrepios me faz lembrar de você na hora kkkkkk"
+  },
+  { 
+    title: "Tardes Que Nunca Acabam - Bacu Exu do Blues", 
+    src: "audio/Baco Exu do Blues - Tardes Que Nunca Acabam.mp3",
+    description: "Essa música me lembra aquelas tardes que ficavamos juntos assistindo filme, aí do nada a gente parava de assistir e aproveitava a presença um do outro kkkkkkk. Nada tão intenso igual na letra, claro, já que nem idade pra isso a gente tem .-." 
+  },
+  { 
+    title: "Die With A Smile - Lady Gaga, Bruno Mars", 
+    src: "audio/Lady Gaga, Bruno Mars - Die With A Smile (Official Music Video).mp3",
+    description: "Eu acho o significado tão bonito, eu não sei que você acha essa música tão boa igual eu acho, mas eu não poderia deixar de colocar ela aqui. Essa e outra que coloquei na lista tem um significado parecido, em que num cenário de fim do mundo, eu iria procurar estar ao seu lado." 
+  },
+  { 
+    title: "As the World Caves In - Matt Maltese", 
+    src: "audio/Matt Maltese - As the World Caves In [Official Music Video].mp3",
+    description: "Eu sei, essa tem um tom muito melancólico e meio pesado, mas também representa o que sinto com a gente. Essa música me faz refletir que a gente precisa aproveitar cada momento como se fosse o último, já que não conseguimos saber se o mundo pode acabar ou não." 
+  },
+  { 
+    title: "Algo Original - Rebecca Sugar", 
+    src: "audio/Algo Original (Steven Universo).mp3",
+    description: "Essa daqui é de um desenho que amo muito (c já sabe disso kkkk), sinto que representa muito bem nossa relação, algo único, diferente, original...Eu n sei se você gosta tanto assim, mas eu gosto muito dessa música, e ela me lembra de você .-." 
+  }
+];
+
+let currentTrackIndex = 0;
+let sound = null;
+const trackInfo = document.getElementById('trackInfo');
+const playPauseButton = document.getElementById('playPause');
+const prevButton = document.getElementById('prev');
+const nextButton = document.getElementById('next');
+
+const descriptionToggle = document.getElementById('toggle-description');
+const descriptionContainer = document.getElementById('music-description');
+const descriptionText = document.getElementById('description-text');
+
+function loadTrack(index) {
+  if (sound) {
+    sound.unload();
+  }
+  const track = playlist[index];
+  
+  sound = new Howl({
+    src: [track.src],
+    html5: true, 
+    onplay: function() {
+      trackInfo.textContent = track.title + " - Tocando";
+      playPauseButton.textContent = "Pause";
+    },
+    onpause: function() {
+      trackInfo.textContent = track.title + " - Pausada";
+      playPauseButton.textContent = "Play";
+    },
+    onend: function() {
+      nextTrack();
+    }
+  });
+
+  descriptionText.textContent = track.description;
+  
+  trackInfo.textContent = track.title;
+}
+
+function togglePlay() {
+  if (!sound) return;
+  if (sound.playing()) {
+    sound.pause();
+  } else {
+    sound.play();
+  }
+}
+
+function nextTrack() {
+  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  loadTrack(currentTrackIndex);
+  sound.play();
+}
+
+function prevTrack() {
+  currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+  loadTrack(currentTrackIndex);
+  sound.play();
+}
+
+playPauseButton.addEventListener('click', togglePlay);
+nextButton.addEventListener('click', nextTrack);
+prevButton.addEventListener('click', prevTrack);
+
+descriptionToggle.addEventListener('click', () => {
+  descriptionContainer.classList.toggle('collapsed');
+});
+
+loadTrack(currentTrackIndex);
+
+document.addEventListener("DOMContentLoaded", function(){
+  const button = document.getElementById('actionButton');
+  const newContent = document.getElementById('newContent');
+  const p = document.getElementById('p');
+
+  button.addEventListener('click', function () {
+   
+    button.classList.add('hidden');
+    p.classList.add('hidden');
+    
+    newContent.classList.add('active');
+    newContent.style.opacity = 0;
+    newContent.style.transition = "opacity 1s";
+    
+    setTimeout(() => { 
+      newContent.style.opacity = 1;
+      
+            if (Howler.ctx.state !== 'running') {
+        Howler.ctx.resume().then(() => {
+      
+          togglePlay();
+          console.log('AudioContext retomado e som iniciado!');
+        });
+      } else {
+        togglePlay();
+      }
+    }, 50);
+  });
+});
+  </script>
+
+  <!-- Joguin :D (aqui eu preferi separar os scripts pq essa parte foi muito mais complicada)-->
+<script>
+const openBtn = document.getElementById('open-game-btn');
+const closeBtn = document.getElementById('close-game-btn');
+const gameContainer = document.getElementById('game-container');
+
+let canvas, ctx, popup, noteText, noteElems, noteImg, lanternEmoji;
+let joy, target;
+let lanternActive = false;
+let gamePaused = false;
+let found = new Set();
+let animationId;
+let isDragging = false;
+let offsetX, offsetY;
+let transitionStart, transitionComplete;
+
+function setupGame() {
+  canvas = document.getElementById('flashlight');
+  ctx = canvas.getContext('2d');
+  popup = document.getElementById('note-popup');
+  noteText = document.getElementById('note-text');
+  noteElems = [...document.querySelectorAll('.note')];
+  noteImg = document.getElementById('note-image');
+  lanternEmoji = document.getElementById('lantern-emoji');
+
+  transitionStart = Date.now();
+  transitionComplete = false;
+
+  lanternEmoji.style.display = 'block';
+  resetLanternPosition();
+  updateLanternPosition();
+
+  lanternEmoji.addEventListener('mousedown', startDrag);
+  lanternEmoji.addEventListener('touchstart', startDrag);
+  document.addEventListener('mousemove', drag);
+  document.addEventListener('touchmove', drag);
+  document.addEventListener('mouseup', endDrag);
+  document.addEventListener('touchend', endDrag);
+
+  window.addEventListener('resize', handleResize);
+  handleResize();
+  updateCounter();
+}
+
+function resetLanternPosition() {
+  joy = { 
+    x: window.innerWidth / 2,
+    y: window.innerHeight - 80
+  };
+  target = { ...joy };
+}
+
+function updateLanternPosition() {
+  if (!lanternEmoji) return;
+  lanternEmoji.style.left = `${joy.x - 25}px`;
+  lanternEmoji.style.top = `${joy.y - 25}px`;
+}
+
+function startDrag(e) {
+  if (!transitionComplete) return; 
+  
+  isDragging = true;
+  lanternActive = true;
+  lanternEmoji.classList.add('dragging');
+  
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  if (clientX === undefined || clientY === undefined) return;
+  
+  const rect = lanternEmoji.getBoundingClientRect();
+  offsetX = clientX - rect.left;
+  offsetY = clientY - rect.top;
+  
+  e.preventDefault();
+}
+
+function drag(e) {
+  if (!isDragging || !transitionComplete) return;
+  
+  const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+  const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+  
+  if (clientX === undefined || clientY === undefined) return;
+  
+  target.x = clientX;
+  target.y = clientY;
+  
+  updateLanternPosition();
+  
+  e.preventDefault();
+}
+
+function endDrag() {
+  isDragging = false;
+  lanternActive = false;
+  lanternEmoji.classList.remove('dragging');
+  
+  resetLanternPosition();
+}
+
+function resetGame() {
+  found = new Set();
+  lanternActive = false;
+  gamePaused = false;
+  transitionComplete = false;
+  transitionStart = Date.now();
+
+  resetLanternPosition();
+  updateLanternPosition();
+
+  popup.style.display = 'none';
+  noteImg.classList.remove('show');
+  noteImg.style.display = 'none';
+  noteText.innerText = '';
+
+  cancelAnimationFrame(animationId);
+  updateCounter();
+  handleResize();
+}
+
+function handleResize() {
+  if (!canvas) return;
+  
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  resetLanternPosition();
+  updateLanternPosition();
+
+  repositionNotes();
+}
+
+function repositionNotes() {
+  const minDistance = Math.min(window.innerWidth, window.innerHeight) * 0.2;
+  const positions = [];
+  const padding = 50;
+
+  noteElems.forEach(note => {
+    let x, y;
+    let valid = false;
+    let attempts = 0;
+
+    while (!valid && attempts < 100) {
+      x = Math.random() * (window.innerWidth - padding * 2) + padding;
+      y = Math.random() * (window.innerHeight - padding * 2) + padding;
+
+      const distToLantern = Math.hypot(x - joy.x, y - joy.y);
+      if (distToLantern < minDistance * 1.5) {
+        attempts++;
+        continue;
+      }
+
+      valid = positions.every(pos => {
+        const dx = pos.x - x;
+        const dy = pos.y - y;
+        return Math.hypot(dx, dy) >= minDistance;
+      });
+
+      if (valid) {
+        positions.push({x, y});
+        note.style.left = `${x}px`;
+        note.style.top = `${y}px`;
+        note.dataset.x = x;
+        note.dataset.y = y;
+      }
+      attempts++;
+    }
+  });
+}
+
+function updateCounter() {
+  const counter = document.getElementById('game-counter');
+  if (!counter) return;
+  
+  const total = document.querySelectorAll('.note').length;
+  const remaining = total - found.size;
+
+  if (remaining > 0) {
+    counter.innerText = `Faltam ${remaining} bilhete${remaining > 1 ? 's' : ''}`;
+  } else {
+    counter.innerText = `Você encontrou todos os bilhetes! 🎉`;
+  }
+}
+
+function showNote(txt) {
+  if (!noteImg) return;
+  
+  noteImg.dataset.message = txt;
+
+  noteImg.style.display = 'block';
+  setTimeout(() => {
+    noteImg.classList.add('show');
+  }, 10);
+
+  gamePaused = true;
+
+  noteImg.onclick = () => {
+    popup.style.display = 'block';
+    noteText.innerText = txt;
+    updateCounter();
+
+    noteImg.classList.remove('show');
+    setTimeout(() => {
+      noteImg.style.display = 'none';
+    }, 500);
+  };
+}
+
+window.closeNote = function () {
+  popup.style.display = 'none';
+  gamePaused = false;
+  loop();
+};
+
+function loop() {
+  if (gamePaused) return;
+  
+  if (!transitionComplete) {
+    const currentTime = Date.now() - transitionStart;
+    const progress = Math.min(currentTime / 2000, 1); 
+    const ease = 1 - Math.pow(1 - progress, 3); 
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = `rgba(0, 0, 0, ${ease})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(255, 255, 255, ' + (ease * 0.8) + ')';
+    ctx.font = '24px Pacifico, cursive';
+    ctx.textAlign = 'center';
+    ctx.fillText('Encontre os bilhetes escondidos...', canvas.width/2, canvas.height/2);
+    
+    if (progress === 1) {
+      transitionComplete = true;
+    }
+    
+    animationId = requestAnimationFrame(loop);
+    return;
+  }
+  // Tá entendendo alguma coisa? kkkkkk
+  const dx = target.x - joy.x;
+  const dy = target.y - joy.y;
+  const distance = Math.hypot(dx, dy);
+
+  if (distance > 2) {
+    const speed = isDragging ? 0.1 : 0.05;
+    joy.x += dx * speed;
+    joy.y += dy * speed;
+  } else {
+    joy.x = target.x;
+    joy.y = target.y;
+  }
+  
+  updateLanternPosition();
+
+  const baseRadius = Math.min(window.innerWidth, window.innerHeight) * 0.2;
+  const lanternRadius = Math.min(Math.max(baseRadius, 120), 300);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.97)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (lanternActive) {
+    
+    const gradient = ctx.createRadialGradient(
+      joy.x, joy.y, 0,
+      joy.x, joy.y, lanternRadius
+    );
+    gradient.addColorStop(0, 'rgba(255, 255, 230, 0.95)');
+    gradient.addColorStop(0.6, 'rgba(255, 220, 150, 0.4)');
+    gradient.addColorStop(0.85, 'rgba(255, 200, 100, 0.1)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(joy.x, joy.y, lanternRadius, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.beginPath();
+    ctx.arc(joy.x, joy.y, lanternRadius * 1.1, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 240, 170, 0.1)';
+    ctx.fill();
+    
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  if (lanternActive) {
+    const detectionRadius = lanternRadius * 0.7;
+    
+    noteElems.forEach((el, i) => {
+      if (found.has(i)) return;
+      
+      const x = parseFloat(el.dataset.x);
+      const y = parseFloat(el.dataset.y);
+      const dx = joy.x - x;
+      const dy = joy.y - y;
+      const distance = Math.hypot(dx, dy);
+      
+      if (distance < detectionRadius) {
+        found.add(i);
+        showNote(el.innerText.trim());
+      }
+    });
+  }
+
+  animationId = requestAnimationFrame(loop);
+}
+
+openBtn.onclick = () => {
+  gameContainer.style.display = 'block';
+  document.body.style.overflowY = 'hidden';
+
+  setupGame();
+  resetGame();
+  loop();
+};
+
+closeBtn.onclick = () => {
+  gameContainer.style.display = 'none';
+  document.body.style.overflowY = 'auto';
+  if (animationId) cancelAnimationFrame(animationId);
+};
+</script>
+
+
+  <!-- Curiosa... kkkkkkkkkkkkkkkk
+     Já que chegou até aqui, saiba que deu trabalho fazer kkkkkkk
+     Mas tá sendo divertido fazer (no momento que eu deixei esse comentário eu ainda n tinha acabado .-.) -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+          integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
+          crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" 
+          integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" 
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" 
+          integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" 
+          crossorigin="anonymous"></script>
+</body>
+</html>
